@@ -26,5 +26,8 @@
     "eslint": "9.39.4",
     "eslint-config-next": "15.5.20",
     "@eslint/eslintrc": "3.3.5"
+  },
+  "overrides": {
+    "unrs-resolver": "1.11.1"
   }
 }
