@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admisien | Dashboard de Admisión</title>
+<style>
+  :root{
+    --bg: #0b0d16;
+    --panel: #12141f;
+    --panel-border: #23273a;
+    --panel-border-soft: #1c1f2e;
+    --primary: #6366F1;
+    --primary-hover: #4F46E5;
+    --accent: #A78BFA;
+    --text: #F5F5F7;
+    --text-dim: #9498ab;
+    --text-dimmer: #6b7086;
+    --green: #34D399;
+    --red: #F87171;
+    --amber: #FBBF24;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 20% 0%, #171a2b 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: var(--font);
+    padding: 28px;
+    min-height: 100vh;
+  }
+  .shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    border: 1px solid var(--panel-border);
+    border-radius: 20px;
+    background: linear-gradient(180deg, #0e1120 0%, #0a0c16 100%);
+    padding: 22px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--panel-border-soft);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-right: 6px;
+  }
+  .brand .logo {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+  }
+  .selectors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  select {
+    background: #171a2a;
+    color: var(--text);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-family: var(--font);
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%239498ab'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    transition: border-color .15s;
+  }
+  select:hover { border-color: var(--primary); }
+
+  .multi-select { position: relative; }
+  .multi-select-btn {
+    background: #171a2a; color: var(--text); border: 1px solid var(--panel-border);
+    border-radius: 10px; padding: 9px 14px; font-size: 13px; font-family: var(--font);
+    cursor: pointer; display: flex; align-items: center; gap: 8px; min-width: 170px;
+    justify-content: space-between; transition: border-color .15s;
+  }
+  .multi-select-btn:hover { border-color: var(--primary); }
+  .multi-select .caret { font-size: 10px; color: var(--text-dimmer); }
+  .multi-select-panel {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 40;
+    background: #171a2a; border: 1px solid var(--panel-border); border-radius: 12px;
+    padding: 8px; min-width: 230px; box-shadow: 0 12px 30px rgba(0,0,0,.4);
+  }
+  .multi-select-panel.open { display: block; }
+  .ms-option {
+    display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; color: var(--text-dim); transition: background .1s;
+  }
+  .ms-option:hover { background: #1e2233; color: var(--text); }
+  .ms-option.checked { color: var(--text); }
+  .ms-check {
+    width: 15px; height: 15px; border-radius: 4px; border: 1px solid var(--panel-border);
+    display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0;
+  }
+  .ms-option.checked .ms-check { background: var(--primary); border-color: var(--primary); color: white; }
+  .ms-divider { height: 1px; background: var(--panel-border-soft); margin: 6px 4px; }
+  .ms-cadence-note {
+    font-size: 11px; color: var(--text-dimmer); padding: 6px 10px 2px;
+  }
+  .status-live {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13px; color: var(--green);
+    margin-left: auto;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .institution-fixed {
+    font-size: 13px; color: var(--text-dim);
+    background: #171a2a; border: 1px solid var(--panel-border);
+    padding: 8px 14px; border-radius: 10px;
+  }
+  .config-toggle {
+    display: flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--accent);
+    border: 1px dashed rgba(167,139,250,.4); border-radius: 10px;
+    padding: 8px 14px; font-size: 12.5px; cursor: pointer;
+    font-family: var(--font); margin-bottom: 14px;
+  }
+  .config-toggle:hover { background: rgba(167,139,250,.08); }
+  .config-panel {
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 14px; padding: 18px; margin-bottom: 14px;
+  }
+  .config-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .config-row label { font-size: 13px; color: var(--text-dim); width: 160px; flex-shrink: 0; }
+  .config-row input {
+    background: #171a2a; color: var(--text); border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 8px 10px; font-family: var(--font); font-size: 13px; width: 160px;
+  }
+  .config-note { font-size: 11.5px; color: var(--text-dimmer); margin-top: 4px; }
+
+  .date-bar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .date-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+  .date-chip {
+    background: #171a2a; border: 1px solid var(--panel-border);
+    color: var(--text-dim); font-size: 12.5px; padding: 7px 13px;
+    border-radius: 20px; cursor: pointer; font-family: var(--font);
+    transition: all .15s;
+  }
+  .date-chip:hover { border-color: var(--primary); color: var(--text); }
+  .date-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .date-custom { display: flex; align-items: center; gap: 8px; }
+  .date-custom input {
+    background: #171a2a; color: var(--text); border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 6px 8px; font-family: var(--font); font-size: 12.5px;
+  }
+  .date-label { margin-left: auto; font-size: 12px; color: var(--text-dimmer); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
+  .kpi-grid-secondary { grid-template-columns: repeat(3, 1fr); margin-bottom: 16px; }
+  .kpi-edit {
+    width: 20px; height: 20px; border-radius: 6px;
+    background: #1b1e30; border: 1px solid var(--panel-border);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 10px; cursor: pointer; color: var(--text-dimmer);
+    transition: all .15s;
+  }
+  .kpi-edit:hover { color: var(--accent); border-color: var(--accent); }
+  .bench-tag { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-left: 6px; }
+  .bench-ok { background: rgba(52,211,153,.15); color: var(--green); }
+  .bench-low { background: rgba(248,113,113,.15); color: var(--red); }
+  .kpi {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    transition: opacity .25s;
+  }
+  .kpi-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .kpi-label { color: var(--text-dim); font-size: 13px; }
+  .kpi-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #1b1e30; display:flex; align-items:center; justify-content:center;
+    font-size: 14px;
+  }
+  .kpi-value { font-size: 26px; font-weight: 700; display:flex; align-items:baseline; gap:8px; }
+  .delta { font-size: 12.5px; font-weight: 600; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+
+  .row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .panel-title {
+    font-size: 12px; letter-spacing: .06em; color: var(--text-dim);
+    font-weight: 700; margin-bottom: 16px; text-transform: uppercase;
+  }
+  .funnel-row { margin-bottom: 14px; }
+  .funnel-row:last-child { margin-bottom: 0; }
+  .funnel-label { display:flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; color: var(--text-dim); }
+  .funnel-label b { color: var(--text); font-weight: 600; }
+  .bar-track { background: #1a1d2c; border-radius: 6px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width .5s ease; }
+  .tag-warn { background: rgba(248,113,113,.15); color: var(--red); font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+
+  .alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; border-radius: 10px; margin-bottom: 10px; font-size: 13px;
+    border: 1px solid;
+  }
+  .alert:last-child { margin-bottom: 0; }
+  .alert.high { background: rgba(248,113,113,.08); border-color: rgba(248,113,113,.3); color: #fca5a5; }
+  .alert.mid { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.3); color: #fcd34d; }
+
+  .prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; font-size: 13px; }
+  .prog-row:last-child { margin-bottom: 0; }
+  .prog-name { width: 92px; color: var(--text-dim); flex-shrink: 0; }
+  .prog-track { flex: 1; background: #1a1d2c; border-radius: 6px; height: 9px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--primary)); }
+  .prog-val { width: 46px; text-align: right; font-weight: 600; }
+
+  .insight-panel {
+    background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(167,139,250,.06));
+    border: 1px solid rgba(99,102,241,.35);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .insight-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .insight-head-left { display: flex; align-items: center; gap: 10px; }
+  .insight-badge {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display:flex; align-items:center; justify-content:center; font-size: 13px;
+  }
+  .insight-title { font-size: 13px; font-weight: 700; }
+  .insight-sub { font-size: 11.5px; color: var(--text-dim); }
+  .btn-analyze {
+    background: var(--primary);
+    color: white; border: none; border-radius: 9px;
+    padding: 8px 14px; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; font-family: var(--font);
+    transition: background .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-analyze:hover { background: var(--primary-hover); }
+  .btn-analyze:disabled { opacity: .6; cursor: not-allowed; }
+  .insight-body { font-size: 13.5px; line-height: 1.6; color: #E5E5EF; }
+  .insight-body ul { margin: 8px 0 0 0; padding-left: 18px; }
+  .insight-body li { margin-bottom: 6px; }
+  .insight-empty { color: var(--text-dimmer); font-size: 13px; font-style: italic; }
+  .spinner {
+    width: 13px; height: 13px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.35); border-top-color: white;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .footer-note { text-align: center; font-size: 11.5px; color: var(--text-dimmer); margin-top: 18px; }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2,1fr); }
+    .row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="logo">A</div>
+      Admisien
+    </div>
+    <div class="institution-fixed" id="institutionName">Universidad Demo</div>
+    <div class="selectors">
+      <div class="multi-select" id="progMultiSelect">
+        <button class="multi-select-btn" id="progMultiBtn" onclick="toggleProgDropdown()">Todos los programas <span class="caret">▾</span></button>
+        <div class="multi-select-panel" id="progMultiPanel"></div>
+      </div>
+      <select id="selProc"></select>
+    </div>
+    <div class="status-live"><span class="dot"></span> En vivo</div>
+  </header>
+
+  <div class="date-bar">
+    <div class="date-presets" id="datePresets"></div>
+    <div class="date-custom" id="dateCustom" style="display:none;">
+      <input type="date" id="dateFrom"> <span style="color:var(--text-dimmer);font-size:12px;">hasta</span> <input type="date" id="dateTo">
+      <button class="btn-analyze" style="padding:7px 12px;" onclick="applyCustomRange()">Aplicar</button>
+    </div>
+    <div class="date-label" id="dateLabel"></div>
+  </div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="kpi-grid kpi-grid-secondary" id="kpiGridSecondary"></div>
+
+  <div class="insight-panel">
+    <div class="insight-head">
+      <div class="insight-head-left">
+        <div class="insight-badge">✦</div>
+        <div>
+          <div class="insight-title">Insight de la semana</div>
+          <div class="insight-sub">Generado a partir de los datos del proceso seleccionado</div>
+        </div>
+      </div>
+      <button class="btn-analyze" id="btnAnalyze" onclick="runAnalysis()">Analizar esta semana</button>
+    </div>
+    <div class="insight-body" id="insightBody">
+      <span class="insight-empty">Aún no se ha generado un análisis para este corte. Presiona "Analizar esta semana" para obtener observaciones y recomendaciones.</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel">
+      <div class="panel-title">Embudo de admisión</div>
+      <div id="funnelWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Alertas activas</div>
+      <div id="alertsWrap"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel">
+      <div class="panel-title">Conversión por programa</div>
+      <div id="progWrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Leads por canal de origen</div>
+      <div id="channelWrap"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel">
+      <div class="panel-title">Leads vs. matriculados (escalas independientes)</div>
+      <svg id="chart" viewBox="0 0 420 220" width="100%" height="220"></svg>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Tendencia de tasa de conversión</div>
+      <svg id="chartConv" viewBox="0 0 420 220" width="100%" height="220"></svg>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="panel" style="grid-column: 1 / -1;">
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Costo por canal</span>
+        <button class="config-toggle" style="margin-bottom:0;" onclick="toggleConfig()">⚙ Cargar gasto manual (Google Ads / LinkedIn)</button>
+      </div>
+      <div class="config-panel" id="configPanel" style="display:none;margin-top:14px;">
+        <div class="config-row">
+          <label>Gasto Google Ads (semana)</label>
+          <input type="number" id="manualGoogleSpend" placeholder="$ 0">
+        </div>
+        <div class="config-row">
+          <label>Gasto LinkedIn (semana)</label>
+          <input type="number" id="manualLinkedinSpend" placeholder="$ 0">
+        </div>
+        <button class="btn-analyze" onclick="saveManualSpend()">Guardar</button>
+        <div class="config-note">Meta se sincroniza automático desde el Business Manager de Admisien. Este panel lo administra el propio equipo del cliente — no depende de que Admisien lo actualice cada semana.</div>
+      </div>
+      <div id="costWrap" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <div class="footer-note">Datos sincronizados desde el sistema de captura de Admisien · Actualizado hace instantes</div>
+</div>
+
+<script>
+// ---------- MOCK DATA ----------
+const INSTITUTION = "Universidad Demo";
+
+// Cada programa define su propia cadencia de procesos (esto lo configura Admisien
+// en el panel admin al hacer el onboarding del programa, no el cliente).
+const PROGRAMS_CONFIG = {
+  "Medicina":              { cadence: "Semestral", processes: [
+    { name: "Proceso 2026 — S2", closed: false },
+    { name: "Proceso 2026 — S1", closed: true },
+    { name: "Proceso 2025 — S2", closed: true },
+  ]},
+  "Derecho":               { cadence: "Semestral", processes: [
+    { name: "Proceso 2026 — S2", closed: false },
+    { name: "Proceso 2026 — S1", closed: true },
+    { name: "Proceso 2025 — S2", closed: true },
+  ]},
+  "Psicología":            { cadence: "Mensual", processes: [
+    { name: "Julio 2026", closed: false },
+    { name: "Junio 2026", closed: true },
+    { name: "Mayo 2026", closed: true },
+    { name: "Abril 2026", closed: true },
+  ]},
+  "Ingeniería Comercial":  { cadence: "Semestral", processes: [
+    { name: "Proceso 2026 — S2", closed: false },
+    { name: "Proceso 2026 — S1", closed: true },
+  ]},
+  "Educación":             { cadence: "Trimestral", processes: [
+    { name: "Trimestre 3 — 2026", closed: false },
+    { name: "Trimestre 2 — 2026", closed: true },
+  ]},
+};
+const PROGRAMS = ["Todos los programas", ...Object.keys(PROGRAMS_CONFIG)];
+
+const KPI_ICONS = ["👤","📋","🎓","%"];
+
+// Overrides de gasto manual cargados por el propio cliente (self-service)
+let manualSpendOverrides = { google: null, linkedin: null };
+
+// Deterministic pseudo-random generator seeded by string, so same selection => same numbers
+function seedNum(str) {
+  let h = 0;
+  for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+function rand(seed, min, max) {
+  const x = Math.sin(seed) * 10000;
+  const frac = x - Math.floor(x);
+  return Math.floor(min + frac * (max - min));
+}
+
+function buildDataset(univ, prog, proc) {
+  const base = seedNum(univ+prog+proc);
+  const isAll = prog === "Todos los programas";
+  const leads = rand(base+1, isAll ? 3800 : 400, isAll ? 5200 : 1400);
+  const contactRate = rand(base+2, 55, 78) / 100;
+  const contacted = Math.floor(leads * contactRate);
+  const postRate = rand(base+3, 18, 34) / 100;
+  const postulantes = Math.floor(contacted * postRate);
+  const matRate = rand(base+4, 24, 42) / 100;
+  const matriculados = Math.floor(postulantes * matRate);
+  const convGlobal = ((matriculados/leads)*100).toFixed(1);
+
+  const deltas = {
+    leads: (rand(base+5, -20, 130)/10).toFixed(1),
+    postulantes: (rand(base+6, -30, 90)/10).toFixed(1),
+    matriculados: (rand(base+7, -50, 60)/10).toFixed(1),
+    conv: (rand(base+8, -30, 30)/10).toFixed(1),
+  };
+
+  const uncontacted48h = Math.floor((leads - contacted) * (rand(base+9, 15, 45)/100));
+  const contactDrop = rand(base+10, 4, 22);
+
+  const programsList = isAll ? Object.keys(PROGRAMS_CONFIG) : [prog];
+
+  const progConv = programsList.map((p,i) => {
+    const s = seedNum(univ+p+proc);
+    return { name: p, value: rand(s, 5, 27) };
+  }).sort((a,b)=>b.value-a.value);
+
+  const weeks = ["S1","S2","S3","S4","S5","S6","S7"];
+  const leadsSeries = weeks.map((w,i)=> rand(base+20+i, 750, 1350));
+  const matSeries = weeks.map((w,i)=> rand(base+40+i, 780, 1250));
+  const convSeries = weeks.map((w,i)=> (rand(base+60+i, 55, 110)/10));
+
+  // Tiempo de cierre: primer contacto -> matrícula (días promedio)
+  const closeDays = (rand(base+70, 45, 260)/10);
+  const benchClose = 12; // referencia interna (editable a futuro por programa)
+
+  // Canales de origen. Nota: la precisión de esta atribución depende de cómo
+  // está construido el funnel de cada programa (formulario previo = atribución
+  // exacta; WhatsApp directo sin link trackeado = atribución aproximada, salvo Meta
+  // que pasa el origen automático vía click-to-WhatsApp).
+  const channels = [
+    { name: "Meta", key: "meta" },
+    { name: "Google Ads", key: "google" },
+    { name: "LinkedIn", key: "linkedin" },
+    { name: "Orgánico / IA", key: "organic" },
+  ];
+  let remaining = leads;
+  const channelData = channels.map((c,i) => {
+    const share = i === channels.length-1 ? remaining : Math.floor(leads * (rand(base+80+i, 10, 40)/100));
+    remaining -= share;
+    return { ...c, leads: Math.max(0, share) };
+  });
+  // ajustar el último para que sume exacto
+  const sumSoFar = channelData.slice(0,-1).reduce((a,c)=>a+c.leads,0);
+  channelData[channelData.length-1].leads = Math.max(0, leads - sumSoFar);
+
+  // Costo por canal — Meta automático (BM), Google/LinkedIn manual (o cargado por el cliente)
+  const costData = channelData.filter(c => c.key !== "organic").map(c => {
+    let spend = rand(base+90+c.key.length, 300000, 2200000);
+    let source = c.key === "meta" ? "Automático (BM)" : "Manual (sin cargar)";
+    if (c.key !== "meta" && manualSpendOverrides[c.key]) {
+      spend = manualSpendOverrides[c.key];
+      source = "Manual (cargado por cliente)";
+    }
+    const cpl = c.leads > 0 ? Math.round(spend / c.leads) : 0;
+    return { ...c, spend, cpl, source };
+  });
+
+  return {
+    leads, contacted, postulantes, matriculados, convGlobal, deltas,
+    uncontacted48h, contactDrop, progConv, weeks, leadsSeries, matSeries, convSeries,
+    closeDays, benchClose, channelData, costData,
+    lowestProg: progConv[progConv.length-1],
+    topProg: progConv[0],
+  };
+}
+
+// ---------- RENDER ----------
+const selProc = document.getElementById('selProc');
+let selectedPrograms = ["Todos los programas"]; // estado inicial
+let activePreset = "Procesos abiertos"; // se declara aquí porque refreshProcesos() la usa antes de llegar a la sección de fechas
+
+document.getElementById('institutionName').textContent = INSTITUTION;
+
+function fillSelect(el, options) {
+  el.innerHTML = options.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
+function toggleProgDropdown() {
+  document.getElementById('progMultiPanel').classList.toggle('open');
+}
+document.addEventListener('click', (e) => {
+  const ms = document.getElementById('progMultiSelect');
+  if (ms && !ms.contains(e.target)) document.getElementById('progMultiPanel').classList.remove('open');
+});
+
+function toggleProgramSelection(p) {
+  if (p === "Todos los programas") {
+    selectedPrograms = ["Todos los programas"];
+  } else {
+    selectedPrograms = selectedPrograms.filter(x => x !== "Todos los programas");
+    if (selectedPrograms.includes(p)) {
+      selectedPrograms = selectedPrograms.filter(x => x !== p);
+      if (selectedPrograms.length === 0) selectedPrograms = ["Todos los programas"];
+    } else {
+      selectedPrograms.push(p);
+    }
+  }
+  renderProgDropdown();
+  refreshProcesos();
+  render();
+}
+
+function renderProgDropdown() {
+  const panel = document.getElementById('progMultiPanel');
+  const specific = Object.keys(PROGRAMS_CONFIG);
+  const allChecked = selectedPrograms.includes("Todos los programas");
+  panel.innerHTML = `
+    <div class="ms-option ${allChecked?'checked':''}" onclick="toggleProgramSelection('Todos los programas')">
+      <div class="ms-check">${allChecked?'✓':''}</div> Todos los programas
+    </div>
+    <div class="ms-divider"></div>
+    ${specific.map(p => {
+      const checked = selectedPrograms.includes(p);
+      return `<div class="ms-option ${checked?'checked':''}" onclick="toggleProgramSelection('${p}')">
+        <div class="ms-check">${checked?'✓':''}</div> ${p} <span style="margin-left:auto;font-size:10.5px;color:var(--text-dimmer);">${PROGRAMS_CONFIG[p].cadence}</span>
+      </div>`;
+    }).join('')}
+  `;
+  const btn = document.getElementById('progMultiBtn');
+  let label;
+  if (allChecked) label = "Todos los programas";
+  else if (selectedPrograms.length === 1) label = selectedPrograms[0];
+  else label = `${selectedPrograms.length} programas seleccionados`;
+  btn.innerHTML = `${label} <span class="caret">▾</span>`;
+}
+renderProgDropdown();
+
+function fillProcSelect(processes) {
+  selProc.innerHTML = processes.map(p =>
+    `<option value="${p.name}">${p.name}${p.closed ? ' (cerrado)' : ''}</option>`
+  ).join('');
+  // por defecto selecciona el primer proceso abierto, si existe
+  const openOne = processes.find(p => !p.closed);
+  if (openOne) selProc.value = openOne.name;
+}
+
+function refreshProcesos() {
+  const specificSelected = selectedPrograms.filter(p => p !== "Todos los programas");
+  const scopeIsAggregate = activePreset === "Procesos abiertos" || activePreset === "Todos los procesos";
+
+  if (specificSelected.length === 0 || scopeIsAggregate) {
+    // "Todos los programas", o el scope activo ya agrupa varios procesos (abiertos/histórico):
+    // no tiene sentido elegir un proceso puntual, se oculta.
+    selProc.style.display = 'none';
+    selProc.innerHTML = '<option value="—">—</option>';
+    return;
+  }
+  const cadences = [...new Set(specificSelected.map(p => PROGRAMS_CONFIG[p].cadence))];
+  if (specificSelected.length === 1 || cadences.length === 1) {
+    // uno solo, o varios con la misma cadencia: sí existe un proceso común
+    selProc.style.display = '';
+    fillProcSelect(PROGRAMS_CONFIG[specificSelected[0]].processes);
+  } else {
+    // cadencias distintas entre los programas elegidos: no hay proceso común, se oculta
+    selProc.style.display = 'none';
+    selProc.innerHTML = '<option value="—">—</option>';
+  }
+}
+refreshProcesos();
+
+function fmt(n) { return n.toLocaleString('es-CL'); }
+
+function sumField(list, key) { return list.reduce((a,d) => a + d[key], 0); }
+function avgField(list, key) { return list.reduce((a,d) => a + parseFloat(d[key]), 0) / list.length; }
+
+function buildAggregate(univ, programs, proc) {
+  const parts = programs.map(p => buildDataset(univ, p, proc));
+  if (parts.length === 1) return parts[0];
+
+  const leads = sumField(parts, 'leads');
+  const contacted = sumField(parts, 'contacted');
+  const postulantes = sumField(parts, 'postulantes');
+  const matriculados = sumField(parts, 'matriculados');
+  const convGlobal = ((matriculados/leads)*100).toFixed(1);
+  const deltas = {
+    leads: (parts.reduce((a,d)=>a+parseFloat(d.deltas.leads),0)/parts.length).toFixed(1),
+    postulantes: (parts.reduce((a,d)=>a+parseFloat(d.deltas.postulantes),0)/parts.length).toFixed(1),
+    matriculados: (parts.reduce((a,d)=>a+parseFloat(d.deltas.matriculados),0)/parts.length).toFixed(1),
+    conv: (parts.reduce((a,d)=>a+parseFloat(d.deltas.conv),0)/parts.length).toFixed(1),
+  };
+  const uncontacted48h = sumField(parts, 'uncontacted48h');
+  const contactDrop = Math.round(parts.reduce((a,d)=>a+d.contactDrop,0)/parts.length);
+  const closeDays = parts.reduce((a,d)=>a+d.closeDays,0)/parts.length;
+  const benchClose = parts[0].benchClose;
+
+  const progConv = parts.map(d => d.progConv[0]).sort((a,b)=>b.value-a.value);
+
+  const weeks = parts[0].weeks;
+  const leadsSeries = weeks.map((w,i) => parts.reduce((a,d)=>a+d.leadsSeries[i],0));
+  const matSeries = weeks.map((w,i) => parts.reduce((a,d)=>a+d.matSeries[i],0));
+  const convSeries = weeks.map((w,i) => parts.reduce((a,d)=>a+parseFloat(d.convSeries[i]),0)/parts.length);
+
+  const channelMap = {};
+  parts.forEach(d => d.channelData.forEach(c => {
+    channelMap[c.key] = channelMap[c.key] || { name: c.name, key: c.key, leads: 0 };
+    channelMap[c.key].leads += c.leads;
+  }));
+  const channelData = Object.values(channelMap);
+
+  const costMap = {};
+  parts.forEach(d => d.costData.forEach(c => {
+    costMap[c.key] = costMap[c.key] || { name: c.name, key: c.key, leads: 0, spend: 0, source: c.source };
+    costMap[c.key].leads += c.leads;
+    costMap[c.key].spend += c.spend;
+  }));
+  const costData = Object.values(costMap).map(c => ({ ...c, cpl: c.leads>0 ? Math.round(c.spend/c.leads) : 0 }));
+
+  return {
+    leads, contacted, postulantes, matriculados, convGlobal, deltas,
+    uncontacted48h, contactDrop, progConv, weeks, leadsSeries, matSeries, convSeries,
+    closeDays, benchClose, channelData, costData,
+    lowestProg: progConv[progConv.length-1],
+    topProg: progConv[0],
+  };
+}
+
+function getEffectiveProc() {
+  return selProc.style.display === 'none' ? (document.getElementById('dateLabel').dataset.key || 'rango-fecha') : selProc.value;
+}
+
+function render() {
+  const univ = INSTITUTION;
+  const programs = selectedPrograms.includes("Todos los programas") ? Object.keys(PROGRAMS_CONFIG) : selectedPrograms;
+  const proc = getEffectiveProc();
+  const d = buildAggregate(univ, programs, proc);
+
+  // KPIs
+  const kpis = [
+    { label: "Leads totales", value: fmt(d.leads), delta: d.deltas.leads },
+    { label: "Postulantes", value: fmt(d.postulantes), delta: d.deltas.postulantes },
+    { label: "Matriculados", value: fmt(d.matriculados), delta: d.deltas.matriculados },
+    { label: "Conv. global", value: d.convGlobal+"%", delta: d.deltas.conv },
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map((k,i) => {
+    const up = parseFloat(k.delta) >= 0;
+    return `<div class="kpi">
+      <div class="kpi-top"><span class="kpi-label">${k.label}</span><div class="kpi-icon">${KPI_ICONS[i]}</div></div>
+      <div class="kpi-value">${k.value}<span class="delta ${up?'up':'down'}">${up?'↗':'↘'} ${Math.abs(k.delta)}%</span></div>
+    </div>`;
+  }).join('');
+
+  // KPIs secundarios: tiempo de cierre, costo por matriculado, benchmark editable
+  const totalSpend = d.costData.reduce((a,c)=>a+c.spend,0);
+  const costPerMat = d.matriculados > 0 ? Math.round(totalSpend / d.matriculados) : 0;
+  const closeBenchOk = d.closeDays <= d.benchClose;
+  const secondaryKpis = [
+    {
+      label: "Tiempo prom. de cierre",
+      value: `${d.closeDays.toFixed(1)} días`,
+      sub: "Primer contacto → matrícula",
+      bench: closeBenchOk ? `<span class="bench-tag bench-ok">dentro de meta</span>` : `<span class="bench-tag bench-low">sobre meta (${d.benchClose}d)</span>`,
+    },
+    {
+      label: "Costo por matriculado",
+      value: `$${fmt(costPerMat)}`,
+      sub: `Gasto pauta Meta + Google + LinkedIn`,
+    },
+    {
+      label: "Inversión total del período",
+      value: `$${fmt(totalSpend)}`,
+      sub: `${d.costData.length} canales con pauta activa`,
+    },
+  ];
+  document.getElementById('kpiGridSecondary').innerHTML = secondaryKpis.map(k => `
+    <div class="kpi">
+      <div class="kpi-top">
+        <span class="kpi-label">${k.label}</span>
+        <div class="kpi-edit" title="Editar meta para este programa/institución">⚙</div>
+      </div>
+      <div class="kpi-value" style="font-size:20px;">${k.value} ${k.bench||''}</div>
+      <div style="font-size:11.5px;color:var(--text-dimmer);margin-top:4px;">${k.sub}</div>
+    </div>
+  `).join('');
+
+  // Funnel
+  const maxV = d.leads;
+  const funnelData = [
+    { label: "Leads", value: d.leads },
+    { label: "Contactados", value: d.contacted },
+    { label: "Postulantes", value: d.postulantes, warn: true },
+    { label: "Matriculados", value: d.matriculados },
+  ];
+  document.getElementById('funnelWrap').innerHTML = funnelData.map(f => `
+    <div class="funnel-row">
+      <div class="funnel-label"><span>${f.label}</span><span><b>${fmt(f.value)}</b>${f.warn?'<span class="tag-warn">↓ mayor caída</span>':''}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(6,(f.value/maxV)*100)}%"></div></div>
+    </div>
+  `).join('');
+
+  // Alerts
+  const alerts = [
+    { level: "high", text: `${fmt(d.uncontacted48h)} leads sin contactar hace +48hs` },
+    { level: "mid", text: `Tasa de contacto cayó ${d.contactDrop}% esta semana` },
+    { level: "mid", text: `${d.lowestProg.name}: menor conversión del corte (${d.lowestProg.value}%)` },
+  ];
+  document.getElementById('alertsWrap').innerHTML = alerts.map(a => `
+    <div class="alert ${a.level}">⚠️ <span>${a.text}</span></div>
+  `).join('');
+
+  // Program conversion
+  const maxProg = Math.max(...d.progConv.map(p=>p.value));
+  document.getElementById('progWrap').innerHTML = d.progConv.map(p => `
+    <div class="prog-row">
+      <div class="prog-name">${p.name}</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${(p.value/maxProg)*100}%"></div></div>
+      <div class="prog-val">${p.value}%</div>
+    </div>
+  `).join('');
+
+  // Channel breakdown
+  const maxChan = Math.max(...d.channelData.map(c=>c.leads));
+  document.getElementById('channelWrap').innerHTML = d.channelData.map(c => `
+    <div class="prog-row">
+      <div class="prog-name">${c.name}</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${maxChan>0?(c.leads/maxChan)*100:0}%"></div></div>
+      <div class="prog-val">${fmt(c.leads)}</div>
+    </div>
+  `).join('');
+
+  // Cost table
+  document.getElementById('costWrap').innerHTML = `
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:10px;font-size:11.5px;color:var(--text-dimmer);padding-bottom:8px;border-bottom:1px solid var(--panel-border-soft);margin-bottom:8px;">
+      <div>CANAL</div><div>LEADS</div><div>INVERSIÓN</div><div>CPL</div><div>ORIGEN DEL DATO</div>
+    </div>
+    ${d.costData.map(c => `
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:10px;font-size:13px;padding:7px 0;align-items:center;">
+        <div>${c.name}</div>
+        <div>${fmt(c.leads)}</div>
+        <div>$${fmt(c.spend)}</div>
+        <div>$${fmt(c.cpl)}</div>
+        <div style="color:${c.source.includes('Automático')?'var(--green)':'var(--text-dim)'};font-size:12px;">${c.source}</div>
+      </div>
+    `).join('')}
+  `;
+
+  // Charts
+  drawDualChart(d.weeks, d.leadsSeries, d.matSeries);
+  drawConvChart(d.weeks, d.convSeries);
+
+  // reset insight panel on filter change
+  document.getElementById('insightBody').innerHTML = '<span class="insight-empty">Aún no se ha generado un análisis para este corte. Presiona "Analizar esta semana" para obtener observaciones y recomendaciones.</span>';
+
+  window.__currentData = d;
+  window.__currentCtx = { univ, prog: programs.length === 1 ? programs[0] : `${programs.length} programas`, proc };
+}
+
+function drawDualChart(labels, leadsSeries, matSeries) {
+  const svg = document.getElementById('chart');
+  const W = 420, H = 230, padL = 34, padR = 34, padB = 30, padT = 14;
+  const minL = Math.min(...leadsSeries) * 0.9, maxL = Math.max(...leadsSeries) * 1.08;
+  const minM = Math.min(...matSeries) * 0.85, maxM = Math.max(...matSeries) * 1.1;
+  const stepX = (W - padL - padR) / (labels.length - 1);
+  const scaleYL = v => H - padB - ((v - minL) / (maxL - minL)) * (H - padB - padT);
+  const scaleYM = v => H - padB - ((v - minM) / (maxM - minM)) * (H - padB - padT);
+
+  const pathL = leadsSeries.map((v,i) => `${i===0?'M':'L'} ${padL + i*stepX} ${scaleYL(v)}`).join(' ');
+  const pathM = matSeries.map((v,i) => `${i===0?'M':'L'} ${padL + i*stepX} ${scaleYM(v)}`).join(' ');
+
+  let gridLines = '';
+  for (let i=0;i<=4;i++){
+    const y = padT + (i/4)*(H-padB-padT);
+    gridLines += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1c1f2e" stroke-width="1"/>`;
+  }
+  const leftLabels = [0,1,2,3,4].map(i => `<text x="2" y="${padT+(i/4)*(H-padB-padT)+4}" font-size="8.5" fill="#6366F1">${Math.round(maxL-(i/4)*(maxL-minL))}</text>`).join('');
+  const rightLabels = [0,1,2,3,4].map(i => `<text x="${W-30}" y="${padT+(i/4)*(H-padB-padT)+4}" font-size="8.5" fill="#34D399">${Math.round(maxM-(i/4)*(maxM-minM))}</text>`).join('');
+  const xLabels = labels.map((l,i) => `<text x="${padL+i*stepX}" y="${H-8}" font-size="9" fill="#6b7086" text-anchor="middle">${l}</text>`).join('');
+
+  svg.innerHTML = `
+    ${gridLines}
+    <path d="${pathL}" fill="none" stroke="#6366F1" stroke-width="2.5"/>
+    <path d="${pathM}" fill="none" stroke="#34D399" stroke-width="2.5"/>
+    ${leftLabels}${rightLabels}${xLabels}
+    <text x="${padL}" y="10" font-size="9" fill="#6366F1">Leads (eje izq.)</text>
+    <text x="${W-100}" y="10" font-size="9" fill="#34D399">Matriculados (eje der.)</text>
+  `;
+}
+
+function drawConvChart(labels, convSeries) {
+  const svg = document.getElementById('chartConv');
+  const W = 420, H = 230, padL = 34, padR = 14, padB = 30, padT = 14;
+  const min = Math.min(...convSeries) * 0.85, max = Math.max(...convSeries) * 1.15;
+  const stepX = (W - padL - padR) / (labels.length - 1);
+  const scaleY = v => H - padB - ((v - min) / (max - min)) * (H - padB - padT);
+  const path = convSeries.map((v,i) => `${i===0?'M':'L'} ${padL + i*stepX} ${scaleY(v)}`).join(' ');
+  const area = `${path} L ${padL+(labels.length-1)*stepX} ${H-padB} L ${padL} ${H-padB} Z`;
+
+  let gridLines = '';
+  for (let i=0;i<=4;i++){
+    const y = padT + (i/4)*(H-padB-padT);
+    const val = (max - (i/4)*(max-min)).toFixed(1);
+    gridLines += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1c1f2e" stroke-width="1"/>`;
+    gridLines += `<text x="2" y="${y+4}" font-size="8.5" fill="#6b7086">${val}%</text>`;
+  }
+  const dots = convSeries.map((v,i) => `<circle cx="${padL+i*stepX}" cy="${scaleY(v)}" r="2.8" fill="#A78BFA"/>`).join('');
+  const xLabels = labels.map((l,i) => `<text x="${padL+i*stepX}" y="${H-8}" font-size="9" fill="#6b7086" text-anchor="middle">${l}</text>`).join('');
+
+  svg.innerHTML = `
+    <defs><linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${gridLines}
+    <path d="${area}" fill="url(#convGrad)"/>
+    <path d="${path}" fill="none" stroke="#A78BFA" stroke-width="2.5"/>
+    ${dots}${xLabels}
+  `;
+}
+
+selProc.addEventListener('change', render);
+
+function toggleConfig() {
+  const p = document.getElementById('configPanel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+function saveManualSpend() {
+  const g = parseInt(document.getElementById('manualGoogleSpend').value, 10);
+  const l = parseInt(document.getElementById('manualLinkedinSpend').value, 10);
+  if (!isNaN(g)) manualSpendOverrides.google = g;
+  if (!isNaN(l)) manualSpendOverrides.linkedin = l;
+  render();
+}
+
+// ---------- SELECTOR DE FECHAS ----------
+const DATE_PRESETS = ["Hoy", "Últimos 3 días", "Últimos 7 días", "Procesos abiertos", "Todos los procesos", "Personalizado"];
+
+function renderDatePresets() {
+  document.getElementById('datePresets').innerHTML = DATE_PRESETS.map(p => `
+    <div class="date-chip ${p===activePreset?'active':''}" onclick="selectPreset('${p}')">${p}</div>
+  `).join('');
+}
+function selectPreset(p) {
+  activePreset = p;
+  renderDatePresets();
+  refreshProcesos();
+  const custom = document.getElementById('dateCustom');
+  const label = document.getElementById('dateLabel');
+  label.dataset.key = p;
+  if (p === "Personalizado") {
+    custom.style.display = 'flex';
+    label.textContent = '';
+    return;
+  }
+  custom.style.display = 'none';
+  const today = new Date();
+  const fmtDate = d => d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' });
+  let from = new Date(today);
+  if (p === "Hoy") from = today;
+  if (p === "Últimos 3 días") from.setDate(today.getDate()-3);
+  if (p === "Últimos 7 días") from.setDate(today.getDate()-7);
+  if (p === "Procesos abiertos") { label.textContent = 'Solo procesos que siguen matriculando'; render(); return; }
+  if (p === "Todos los procesos") { label.textContent = 'Histórico completo (abiertos + cerrados)'; render(); return; }
+  label.textContent = `Del ${fmtDate(from)} al ${fmtDate(today)}`;
+  render();
+}
+function applyCustomRange() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const label = document.getElementById('dateLabel');
+  label.dataset.key = `custom-${from}-${to}`;
+  label.textContent = from && to ? `Del ${from} al ${to}` : 'Selecciona ambas fechas';
+  render();
+}
+renderDatePresets();
+selectPreset("Procesos abiertos");
+
+render();
+
+// ---------- AI INSIGHT SIMULATION ----------
+function runAnalysis() {
+  const btn = document.getElementById('btnAnalyze');
+  const body = document.getElementById('insightBody');
+  const d = window.__currentData;
+  const ctx = window.__currentCtx;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analizando…';
+  body.innerHTML = '<span class="insight-empty">Procesando datos del corte seleccionado…</span>';
+
+  setTimeout(() => {
+    const convTrend = parseFloat(d.deltas.conv) >= 0 ? "una mejora" : "una caída";
+    const worseProg = d.lowestProg.name;
+    const bestProg = d.topProg.name;
+    const text = `
+      <p>En <b>${ctx.prog === "Todos los programas" || ctx.prog.includes("programas") ? "los programas seleccionados" : ctx.prog}</b> de <b>${ctx.univ}</b> (${ctx.proc}), la conversión global muestra ${convTrend} de ${Math.abs(d.deltas.conv)}% respecto a la semana anterior.</p>
+      <ul>
+        <li><b>Riesgo principal:</b> ${fmt(d.uncontacted48h)} leads llevan más de 48 horas sin contacto. Esto explica gran parte de la brecha entre leads y postulantes esta semana.</li>
+        <li><b>Programa más débil:</b> ${worseProg} tiene la conversión más baja del corte (${d.lowestProg.value}%), mientras que ${bestProg} lidera con ${d.topProg.value}%. Vale la pena revisar si el guion de seguimiento es el mismo para ambos.</li>
+        <li><b>Recomendación:</b> Priorizar el contacto de los leads pendientes de ${worseProg} en las próximas 24 horas; ese grupo concentra el mayor riesgo de fuga antes de postulación.</li>
+      </ul>
+    `;
+    body.innerHTML = text;
+    btn.disabled = false;
+    btn.innerHTML = 'Analizar esta semana';
+  }, 1400);
+}
+</script>
+</body>
+</html>

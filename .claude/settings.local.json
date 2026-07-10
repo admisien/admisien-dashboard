@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --app --no-src-dir --import-alias \"@/*\" --eslint --use-npm --skip-install)",
+      "Bash(cd \"/Users/carpetadeinicio/Desktop/Trabajo/admisien-dashboard\" && mkdir -p app/\\\\\\(auth\\\\\\)/login \"app/\\(dashboard\\)\" app/api/auth/\\\\[...nextauth\\\\] app/api/dashboard app/api/spend components/dashboard components/ui lib/data types && ls -la)",
+      "Bash(npm install *)",
+      "Bash(npm view *)",
+      "Bash(npm audit *)",
+      "Bash(npx next *)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\")",
+      "Bash(awk '/interface CallbacksOptions/,/^}/' node_modules/@auth/core/types.d.ts)",
+      "Bash(npx tsc *)",
+      "Bash(mkdir -p app/dashboard)",
+      "Bash(git mv *)",
+      "Bash(mv \"app/\\(dashboard\\)/layout.tsx\" app/dashboard/layout.tsx)",
+      "Bash(mv \"app/\\(dashboard\\)/page.tsx\" app/dashboard/page.tsx)",
+      "Bash(rmdir \"app/\\(dashboard\\)\")"
+    ]
+  }
+}
